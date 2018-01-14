@@ -15,7 +15,7 @@ define Package/l3roamd
   SECTION:=net
   CATEGORY:=Network
   TITLE:=The layer 3 roaming daemon
-  DEPENDS:=+libnl-tiny +kmod-tun +librt
+  DEPENDS:=+libnl-tiny +kmod-tun +librt +libjson-c
 endef
 
 define Package/l3roamd/install
