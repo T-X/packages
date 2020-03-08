@@ -1,0 +1,7 @@
+config general
+	option disabled '0'
+
+config blacklist
+	list ifname 'lo'
+	list ifname 'bat0'
+	list ifname 'bat1'

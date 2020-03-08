@@ -1,0 +1,41 @@
+mldpoker_start_check() {
+	local brtype="`uci get network.$INTERFACE.type`"
+
+	if [ ! "$brtype" = "bridge" ] ||
+	   [ ! "`cat /sys/class/net/$DEVICE/bridge/multicast_snooping`" = "1" ] ||
+	   [ ! "`cat /sys/class/net/$DEVICE/bridge/multicast_querier`" = "1" ]; then
+		return 1
+	fi
+
+	return 0
+}
+
+mldpoker_start() {
+	local iface
+
+	mldpoker_start_check || exit 0
+
+	for iface in /sys/class/net/$DEVICE/brif/*; do
+		/etc/init.d/mldpoker start "${iface##*/}"
+	done
+}
+
+mldpoker_stop() {
+	for iface in /sys/class/net/$DEVICE/brif/*; do
+		/etc/init.d/mldpoker stop "${iface##*/}"
+	done
+}
+
+
+[ "`uci get mldpoker.@general[0].disabled`" = "1" ] && exit 0
+
+
+if [ "$ACTION" = "ifup" ]; then
+	logger -t mldpoker "Hotplug: Starting mldpokers for bridge $DEVICE"
+	mldpoker_start
+elif ["$ACTION" = "ifdown" ]; then
+	logger -t mldpoker "Hotplug: Stopping mldpokers for bridge $DEVICE"
+	mldpoker_stop
+else
+	logger -t mldpoker "Hotplug: Unknown ACTION: $ACTION for $DEVICE"
+fi
